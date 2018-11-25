@@ -1,16 +1,9 @@
 <?php
-try{
-  $connString = "mysql:host=localhost;dbname=book";
-  $user = "testuser";
-  $pass = "mypassword";
-  
-  $pdo = new PDO($connString, $user, $pass);
-  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  $sql = "SELECT * FROM Employees ORDER BY LastName";
-  $result = $pdo->query($sql);
-} catch (PDOEsception $e) {
-  die($e->getMessage());
-}
+define('DBHOST', '');
+define('DBNAME', 'book');
+define('DBUSER', 'testuser');
+define('DBPASS', 'mypassword');
+define('DBCONNSTRING', 'mysql:dbname=book;charset=utf8mb4;');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,10 +50,19 @@ try{
                          <?php  
                            /* programmatically loop though employees and display each
                               name as <li> element. */
-                            foreach($result as $row){?>
-                      <li><a href="http://cs4345dag-davidgregor444440.codeanyapp.com/chap_project_14/project1/chapter14-project1.php<?php echo "?employee=".$row[0];?>">
-                        <?php echo $row[2]." ".$row[1];?></a></li>
-                            <?php  
+                            
+                            try {
+                              $pdo = new PDO(DBCONNSTRING, DBUSER, DBPASS);
+                              $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                              $sql = "SELECT EmployeeID, FirstName, LastName FROM Employees ORDER BY LastName ASC";
+                              $result = $pdo->query($sql);
+                              while ($row = $result->fetch()) {
+                                echo "<li><a href='chapter14-project1.php?employeeId=" . $row['EmployeeID'] . "'>" . $row['FirstName'] . " " . $row['LastName'] . "</a></li>";
+                              }
+                              $pdo = null;
+                            }
+                            catch (PDOException $e) {
+                              die($e->getMessage());
                             }
                          ?>            
 
@@ -86,6 +88,25 @@ try{
                            <?php   
                              /* display requested employee's information */
                             
+                            $id = $_GET["employeeId"];
+                            try {
+                              $pdo = new PDO(DBCONNSTRING, DBUSER, DBPASS);
+                              $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                              $sql = "SELECT EmployeeID, FirstName, LastName, Address, City, Region, Country, Postal, Email FROM Employees WHERE EmployeeID=" . $id;
+                              $result = $pdo->query($sql);
+                              while ($row = $result->fetch()) {
+                                echo "<h2>" . $row['FirstName'] . " " . $row['LastName'] . "</h1>";
+                                echo "</br>";
+                                echo $row['Address'] . "</br>";
+                                echo $row['City'] . ", " . $row['Region'] . "</br>";
+                                echo $row['Country'] . ", " . $row['Postal'] . "</br>";
+                                echo $row['Email'] . "</br>";
+                              }
+                              $pdo = null;
+                            }
+                            catch (PDOException $e) {
+                              die($e->getMessage());
+                            }
                            ?>
                            
          
@@ -108,7 +129,24 @@ try{
                                   </thead>
                                   <tbody>
                                    
-                                    <?php /*  display TODOs  */ ?>
+                                    <?php /*  display TODOs  */
+                                      
+                                      $id = $_GET["employeeId"];
+                                      try {
+                                        $pdo = new PDO(DBCONNSTRING, DBUSER, DBPASS);
+                                        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                                        $sql = "SELECT ToDoID, EmployeeID, Status, Priority, DateBy, Description FROM EmployeeToDo WHERE EmployeeID=" . $id . " ORDER BY DateBy ASC";
+                                        $result = $pdo->query($sql);
+                                        while ($row = $result->fetch()) {
+                                          echo "<tr><td>" . $row['DateBy'] . "</td><td>" . $row['Status'] . "</td><td>" . $row['Priority'] . "</td><td>" . $row['Description'] . "</td></tr>";
+                                        }
+                                        $pdo = null;
+                                      }
+                                      catch (PDOException $e) {
+                                        die($e->getMessage());
+                                      }
+                                      
+                                    ?>
                             
                                   </tbody>
                                 </table>
